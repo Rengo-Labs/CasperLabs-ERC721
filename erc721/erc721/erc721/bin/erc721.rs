@@ -2,6 +2,8 @@
 #![no_std]
 
 extern crate alloc;
+
+
 use alloc::{boxed::Box, collections::BTreeSet, format, vec, vec::Vec, string::String};
 use casper_contract::{
     contract_api::{runtime, storage},
@@ -9,7 +11,7 @@ use casper_contract::{
 };
 use casper_types::{
     runtime_args, CLType, CLTyped, CLValue, ContractHash, ContractPackageHash, EntryPoint,
-    EntryPointAccess, EntryPointType, EntryPoints, Group, Key, Parameter, RuntimeArgs, URef, U256,
+    EntryPointAccess, EntryPointType, EntryPoints, Group, Key, Parameter, RuntimeArgs, URef, U256, bytesrepr::{Bytes, ToBytes},
 };
 use contract_utils::{ContractContext, OnChainContractStorage};
 use erc721::ERC721;
@@ -41,7 +43,92 @@ fn constructor() {
     Erc721::default().constructor(name,
         symbol,contract_hash, package_hash);
 }
-
+#[no_mangle]
+fn balance_of() {
+    let owner: Key = runtime::get_named_arg("owner");
+    let ret = Erc721::default().balance_of(owner);
+    runtime::ret(CLValue::from_t(ret).unwrap_or_revert());
+}
+#[no_mangle]
+fn owner_of() {
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    Erc721::default().owner_of(token_id);
+}
+#[no_mangle]
+fn name() {
+    let ret:String = Erc721::default().name();
+    runtime::ret(CLValue::from_t(ret).unwrap_or_revert());
+}
+#[no_mangle]
+fn symbol() {
+    let ret:String = Erc721::default().symbol();
+    runtime::ret(CLValue::from_t(ret).unwrap_or_revert());
+}
+#[no_mangle]
+fn token_uri() {
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    let ret:String = Erc721::default().token_uri(token_id);
+    runtime::ret(CLValue::from_t(ret).unwrap_or_revert());
+}
+#[no_mangle]
+fn approve() {
+    let to:Key = runtime::get_named_arg("to");
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    Erc721::default().approve(to,token_id);
+}
+#[no_mangle]
+fn get_approved() {
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    let ret = Erc721::default().get_approved(token_id);
+    runtime::ret(CLValue::from_t(ret).unwrap_or_revert());
+}
+#[no_mangle]
+fn set_approval_for_all(){
+    let operator: Key = runtime::get_named_arg("operator");
+    let approved: bool = runtime::get_named_arg("approved");
+    Erc721::default().set_approved_for_all(operator,approved);
+    
+}
+#[no_mangle]
+fn is_approved_for_all(){
+    let owner: Key = runtime::get_named_arg("owner");
+    let operator: Key = runtime::get_named_arg("operator");
+    let ret = Erc721::default().is_approved_for_all(owner,operator);
+    runtime::ret(CLValue::from_t(ret).unwrap_or_revert());
+}
+#[no_mangle]
+fn transfer_from() {
+    let from:Key = runtime::get_named_arg("from");
+    let to:Key = runtime::get_named_arg("to");
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    Erc721::default().transfer_from(from,to,token_id);
+}
+#[no_mangle]
+fn safe_transfer_from() {
+    let from:Key = runtime::get_named_arg("from");
+    let to:Key = runtime::get_named_arg("to");
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    Erc721::default().safe_transfer_from(from,to,token_id);
+}
+#[no_mangle]
+fn safe_transfer_from_() {
+    let from:Key = runtime::get_named_arg("from");
+    let to:Key = runtime::get_named_arg("to");
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    let _data:Bytes = runtime::get_named_arg("_data");
+    Erc721::default().safe_transfer_from_(from,to,token_id,_data);
+}
+#[no_mangle]
+fn mint() {
+    let to:Key = runtime::get_named_arg("to");
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    Erc721::default().mint(to,token_id);
+}
+#[no_mangle]
+fn burn() {
+    let token_id: U256 = runtime::get_named_arg("token_id");
+    Erc721::default().burn(token_id);
+}
 fn get_entry_points() -> EntryPoints {
     let mut entry_points = EntryPoints::new();
     entry_points.add_entry_point(EntryPoint::new(
@@ -54,6 +141,140 @@ fn get_entry_points() -> EntryPoints {
         ],
         <()>::cl_type(),
         EntryPointAccess::Groups(vec![Group::new("constructor")]),
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "balance_of",
+        vec![
+            Parameter::new("owner", Key::cl_type()),
+        ],
+        U256::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "owner_of",
+        vec![
+            Parameter::new("token_id", U256::cl_type()),
+        ],
+        Key::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "name",
+        vec![],
+        String::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "symbol",
+        vec![],
+        String::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "token_uri",
+        vec![
+            Parameter::new("token_id", U256::cl_type()),
+        ],
+        String::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "approve",
+        vec![
+            Parameter::new("to", Key::cl_type()),
+            Parameter::new("token_id", U256::cl_type()),
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "get_approved",
+        vec![
+            Parameter::new("token_id", U256::cl_type()),
+        ],
+        Key::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "set_approval_for_all",
+        vec![
+            Parameter::new("operator", Key::cl_type()),
+            Parameter::new("approved", bool::cl_type())
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "is_approved_for_all",
+        vec![
+            Parameter::new("owner", Key::cl_type()),
+            Parameter::new("operator", Key::cl_type())
+        ],
+        bool::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "transfer_from",
+        vec![
+            Parameter::new("from", Key::cl_type()),
+            Parameter::new("to", Key::cl_type()),
+            Parameter::new("token_id", U256::cl_type()),
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "safe_transfer_from",
+        vec![
+            Parameter::new("from", Key::cl_type()),
+            Parameter::new("to", Key::cl_type()),
+            Parameter::new("token_id", U256::cl_type())
+            
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "safe_transfer_from_",
+        vec![
+            Parameter::new("from", Key::cl_type()),
+            Parameter::new("to", Key::cl_type()),
+            Parameter::new("token_id", U256::cl_type()),
+            Parameter::new("_data", Bytes::cl_type())
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "mint",
+        vec![
+            Parameter::new("to", Key::cl_type()),
+            Parameter::new("token_id", U256::cl_type())
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
+        EntryPointType::Contract,
+    ));
+    entry_points.add_entry_point(EntryPoint::new(
+        "burn",
+        vec![
+            Parameter::new("token_id", U256::cl_type())
+        ],
+        <()>::cl_type(),
+        EntryPointAccess::Public,
         EntryPointType::Contract,
     ));
     entry_points

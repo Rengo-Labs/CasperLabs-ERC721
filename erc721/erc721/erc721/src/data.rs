@@ -31,7 +31,7 @@ impl Owners {
     }
 
     pub fn get(&self, owner: &U256) -> Key {
-        self.dict.get(owner.to_string().as_str()).unwrap_or_revert()
+        self.dict.get(owner.to_string().as_str()).unwrap_or_revert_with(10)
     }
 
     pub fn set(&self, owner: &U256, value: Key) {
@@ -121,6 +121,13 @@ pub fn set_result<T: ToBytes + CLTyped>(value: T) {
             runtime::put_key(RESULT, key);
         }
     }
+}
+pub fn ZERO_ADDRESS() -> Key 
+{
+    Key::from_formatted_str(
+        "hash-0000000000000000000000000000000000000000000000000000000000000000".into(),
+    )
+    .unwrap()
 }
 pub fn name() -> String {
     get_key(NAME).unwrap_or_revert()
