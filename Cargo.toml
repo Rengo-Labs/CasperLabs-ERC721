@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "erc721",
+    "erc721_crate",
+    "erc721-tests"
+]
+
+[profile.release]
+codegen-units = 1
+lto = true
