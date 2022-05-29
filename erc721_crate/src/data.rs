@@ -6,15 +6,15 @@ use casper_contract::{
     unwrap_or_revert::UnwrapOrRevert,
 };
 use casper_types::{bytesrepr::ToBytes, CLTyped, ContractPackageHash, Key, U256};
-use contract_utils::{get_key, set_key};
 use contract_utils::Dict;
+use contract_utils::{get_key, set_key};
 
 pub const SELF_CONTRACT_HASH: &str = "self_contract_hash";
 pub const SELF_PACKAGE_HASH: &str = "self_package_hash";
 pub const RESULT: &str = "result";
 pub const OWNERS: &str = "owners";
-pub const NAME:&str = "name";
-pub const SYMBOL:&str = "symbol";
+pub const NAME: &str = "name";
+pub const SYMBOL: &str = "symbol";
 pub struct Owners {
     dict: Dict,
 }
@@ -44,7 +44,7 @@ pub struct Balances {
 }
 
 impl Balances {
-    pub fn instance() -> Balances{
+    pub fn instance() -> Balances {
         Balances {
             dict: Dict::instance(BALACNES),
         }
@@ -68,7 +68,7 @@ pub struct TokenApprovals {
 }
 
 impl TokenApprovals {
-    pub fn instance() -> TokenApprovals{
+    pub fn instance() -> TokenApprovals {
         TokenApprovals {
             dict: Dict::instance(TOEKEN_APPROVALS),
         }
@@ -92,7 +92,7 @@ pub struct OperatorApprovals {
 }
 
 impl OperatorApprovals {
-    pub fn instance() -> OperatorApprovals{
+    pub fn instance() -> OperatorApprovals {
         OperatorApprovals {
             dict: Dict::instance(Operator_Approvals),
         }
@@ -122,8 +122,7 @@ pub fn set_result<T: ToBytes + CLTyped>(value: T) {
         }
     }
 }
-pub fn ZERO_ADDRESS() -> Key 
-{
+pub fn ZERO_ADDRESS() -> Key {
     Key::from_formatted_str(
         "hash-0000000000000000000000000000000000000000000000000000000000000000".into(),
     )
